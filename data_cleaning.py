@@ -53,28 +53,21 @@ class DataFrameInfo:
         
     def show_colm_dtypes(self):
         self.df_raw.info()
+        print("\n")
         
     def show_colm_stat_values(self):
         print(self.df_raw.describe())
         
     def show_categ_colm_values_count(self):
-        print(self.df_raw["term"].value_counts(), "\n")
-        print(self.df_raw["grade"].value_counts(), "\n")
-        print(self.df_raw["sub_grade"].value_counts(), "\n")
-        print(self.df_raw["employment_length"].value_counts(), "\n")
-        print(self.df_raw["home_ownership"].value_counts(), "\n")
-        print(self.df_raw["verification_status"].value_counts(), "\n")
-        print(self.df_raw["loan_status"].value_counts(), "\n")
-        print(self.df_raw["payment_plan"].value_counts(), "\n")
-        print(self.df_raw["purpose"].value_counts(), "\n")
-        print(self.df_raw["policy_code"].value_counts(), "\n")
-        print(self.df_raw["application_type"].value_counts(), "\n")
+        cat_colm = [self.df_raw["term"], self.df_raw["grade"], self.df_raw["sub_grade"], self.df_raw["employment_length"], self.df_raw["home_ownership"], self.df_raw["verification_status"], self.df_raw["loan_status"], self.df_raw["payment_plan"], self.df_raw["purpose"], self.df_raw["policy_code"], self.df_raw["application_type"] ]
+        for colm in cat_colm:
+            print(colm.value_counts(), "\n")
         
     def show_df_shape(self):
-        print(self.df_raw.shape, "\n")
+        print(f"The shape of the data frame is: {self.df_raw.shape}", "\n")
         
     def show_null_percentage(self):
-        print(self.df_raw.isnull().sum()/len(self.df_raw))
+        print(f"The percentage of Nan values is each column: \n{self.df_raw.isnull().sum()/len(self.df_raw)}")
         
 info = DataFrameInfo(df_raw)
 
@@ -104,188 +97,76 @@ class Plotter:
         print(self.df_raw.isnull().sum()/len(self.df_raw), "\n")
         msno.matrix(self.df_raw) 
         
-    def test_norm_distr_funded_amount(self):
-        data = self.df_raw["funded_amount"]
-        stat, p = normaltest(data, nan_policy='omit')
-        print(" Statistics=%.3f, p=%.3f" % (stat, p), "\n")
-        qq_plot = qqplot(self.df_raw["funded_amount"], scale=1, line='q')
-        plot.title("The distribution of funded_amount values")
-        plot.show()
-        print(f'\nThe median of funded_amount is {df_raw["funded_amount"].median()}')
-        print(f'The mean of funded_amount is {df_raw["funded_amount"].mean()}')
+    def test_normal_distribution(self):    
+        nd_columns = ["loan_amount", "funded_amount", "funded_amount_inv", "int_rate", "instalment", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_accounts", "total_accounts", "out_prncp", "out_prncp_inv", "total_payment", "total_payment_inv", "total_rec_prncp", "total_rec_int", "total_rec_late_fee", "recoveries", "collection_recovery_fee", "last_payment_amount", "collections_12_mths_ex_med"]
+        for colm in nd_columns:
+            data = self.df_raw[colm]
+            stat, p = normaltest(data, nan_policy='omit')
+            print("Statistics=%.3f, p=%.3f" % (stat, p), "\n")
+            qq_plot = qqplot(self.df_raw[colm], scale=1, line='q')
+            plot.title(f"The distribution of {colm} values")
+            plot.show()
+            print(f'\nThe median of {colm} is {df_raw[colm].median()}')
+            print(f'The mean of {colm} is {df_raw[colm].mean()}')
         
-    def test_norm_distr_int_rate(self):
-        data = self.df_raw["int_rate"]
-        stat, p = normaltest(data, nan_policy='omit')
-        print(" Statistics=%.3f, p=%.3f" % (stat, p), "\n")
-        qq_plot = qqplot(self.df_raw["int_rate"], scale=1, line='q')
-        plot.title("The distribution of int_rate values")
-        plot.show()
-        print(f'\nThe median of int_rate is {df_raw["int_rate"].median()}')
-        print(f'The mean of int_rate is {df_raw["int_rate"].mean()}')
-        
-    def test_norm_distr_collections_12_mths_ex_med(self):
-        data = self.df_raw["collections_12_mths_ex_med"]
-        stat, p = normaltest(data, nan_policy='omit')
-        print(" Statistics=%.3f, p=%.3f" % (stat, p), "\n")
-        qq_plot = qqplot(self.df_raw["collections_12_mths_ex_med"], scale=1, line='q')
-        plot.title("The distribution of collections_12_mths_ex_med values")
-        plot.show()
-        print(f'\nThe median of collections_12_mths_ex_med is {df_raw["collections_12_mths_ex_med"].median()}')
-        print(f'The mean of collections_12_mths_ex_med is {df_raw["collections_12_mths_ex_med"].mean()}')
-        
-    def show_disc_prob_distr_term(self):
-        plot.rc("axes.spines", top=False, right=False)
-        probs = self.df_raw["term"].value_counts(normalize=True)
-        dpd=sns.barplot(y=probs.index, x=probs.values, color='b')
-        plot.xlabel("Values")
-        plot.ylabel("Probability")
-        plot.title("Discrete Probability Distribution")
-        plot.show()
-        print("\nThe value counts in  ")
-        print(self.df_raw["term"].value_counts())
-        print(f'\nThe mode of term column is {self.df_raw["term"].mode()[0]}')
-        
-    def show_disc_prob_distr_employment_length(self):
-        plot.rc("axes.spines", top=False, right=False)
-        probs = self.df_raw["employment_length"].value_counts(normalize=True)
-        dpd=sns.barplot(y=probs.index, x=probs.values, color='b')
-        plot.xlabel("Values")
-        plot.ylabel("Probability")
-        plot.title("Discrete Probability Distribution")
-        plot.show()
-        print("\nThe value counts in  ")
-        print(self.df_raw["employment_length"].value_counts())
-        print(f'\nThe mode of employment_length column is {self.df_raw["employment_length"].mode()[0]}', "\n")
-        
-    def show_skewness_loan_amount(self):
-        self.df_raw["loan_amount"].hist(bins=50)
-        print(f"Skew of loan_amount column is {self.df_raw['loan_amount'].skew()}", "\n") #This indicates a moderate positive skew. The data requires a transformation.
-        
-    def show_skewness_funded_amount(self):
-        self.df_raw["funded_amount"].hist(bins=50)
-        print(f"Skew of funded_amount column is {self.df_raw['funded_amount'].skew()}", "\n") #This indicates a moderate positive skew. The data requires a transformation.
-        
-    def show_skewness_funded_amount_inv(self):
-        self.df_raw["funded_amount_inv"].hist(bins=50)
-        print(f"Skew of funded_amount_inv column is {self.df_raw['funded_amount_inv'].skew()}", "\n") #This indicates a moderate positive skew. The data requires a transformation.
-        
-    def show_skewness_int_rate(self):
-        self.df_raw["int_rate"].hist(bins=50)
-        print(f"Skew of int_rate column is {self.df_raw['int_rate'].skew()}", "\n") #This indicates that a distribution of data is approximately symmetric. Data does not require a transformation.
-        
-    def show_skewness_instalment(self):
-        self.df_raw["instalment"].hist(bins=50)
-        print(f"Skew of instalment column is {self.df_raw['instalment'].skew()}", "\n") #This indicates a moderate positive skew. The data requires a transformation.
-        
-    def show_skewness_annual_inc(self):
-        self.df_raw["annual_inc"].hist(bins=50)
-        print(f"Skew of annual_inc column is {self.df_raw['annual_inc'].skew()}", "\n") #This indicates a strong positive skew. The data requires a transformation.
-        
-    def show_skewness_dti(self):
-        self.df_raw["dti"].hist(bins=50)
-        print(f"Skew of dti column is {self.df_raw['dti'].skew()}", "\n") #This indicates that a distribution of data is approximately symmetric. Data does not require a transformation.
-        
-    def show_skewness_delinq_2yrs(self):
-        self.df_raw["delinq_2yrs"].hist(bins=50)
-        print(f"Skew of delinq_2yrs column is {self.df_raw['delinq_2yrs'].skew()}", "\n") #This indicates a strong positive skew. The data requires a transformation.
-        
-    def show_skewness_inq_last_6mths(self):
-        self.df_raw["inq_last_6mths"].hist(bins=50)
-        print(f"Skew of inq_last_6mths column is {self.df_raw['inq_last_6mths'].skew()}", "\n") #This indicates a strong positive skew. The data requires a transformation.
-        
-    def show_skewness_open_accounts(self):
-        self.df_raw["open_accounts"].hist(bins=50)
-        print(f"Skew of open_accounts column is {self.df_raw['open_accounts'].skew()}", "\n") #This indicates a strong positive skew. The data requires a transformation.
-        
-    def show_skewness_total_accounts(self):
-        self.df_raw["total_accounts"].hist(bins=50)
-        print(f"Skew of total_accounts column is {self.df_raw['total_accounts'].skew()}", "\n") #This indicates a moderate positive skew. The data requires a transformation.
-        
-    def show_skewness_out_prncp(self):
-        self.df_raw["out_prncp"].hist(bins=50)
-        print(f"Skew of out_prncp column is {self.df_raw['out_prncp'].skew()}", "\n") #This indicates a strong positive skew. The data requires a transformation.
-        
-    def show_skewness_out_prncp_inv(self):
-        self.df_raw["out_prncp_inv"].hist(bins=50)
-        print(f"Skew of out_prncp_inv column is {self.df_raw['out_prncp_inv'].skew()}", "\n") #This indicates a strong positive skew. The data requires a transformation.
-        
-    def show_skewness_total_payment(self):
-        self.df_raw["total_payment"].hist(bins=50)
-        print(f"Skew of total_payment column is {self.df_raw['total_payment'].skew()}", "\n") #This indicates a strong positive skew. The data requires a transformation.
-        
-    def show_skewness_total_rec_prncp(self):
-        self.df_raw["total_rec_prncp"].hist(bins=50)
-        print(f"Skew of total_rec_prncp column is {self.df_raw['total_rec_prncp'].skew()}", "\n") #This indicates a strong positive skew. The data requires a transformation.
+    def show_disc_prob_distr(self):
+        dpd_columns = ["term", "grade", "sub_grade", "employment_length", "home_ownership", "verification_status", "loan_status", "payment_plan", "purpose", "policy_code", "application_type"]
+        for clmn in dpd_columns:
+            plot.rc("axes.spines", top=False, right=False)
+            probs = self.df_raw[clmn].value_counts(normalize=True)
+            dpd=sns.barplot(y=probs.index, x=probs.values, color='b')
+            plot.xlabel("Values")
+            plot.ylabel("Probability")
+            plot.title(f"Discrete Probability Distribution of {clmn}")
+            plot.show()
+            print("\nThe value counts in  ")
+            print(self.df_raw[clmn].value_counts())
+            print(f'\nThe mode of {clmn} column is {self.df_raw[clmn].mode()[0]}')
+            
+    def show_skewness(self):
+        skew_columns = ["loan_amount", "funded_amount", "funded_amount_inv", "int_rate", "instalment", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_accounts", "total_accounts", "out_prncp", "out_prncp_inv", "total_payment", "total_rec_prncp"]
+        for sk_colm in skew_columns:
+            self.df_raw[sk_colm].hist(bins=50)
+            print(f"\nSkew of {sk_colm} column is {self.df_raw[sk_colm].skew()}", "\n")
+            
+    def show_cont_data_outliers(self):
+        Cont_data_columns = ['loan_amount', 'funded_amount', 'funded_amount_inv', 'int_rate', 'instalment', 'annual_inc', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'open_accounts', 'total_accounts', 'out_prncp', 'out_prncp_inv', 'total_payment', 'total_payment_inv', 'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries', 'collection_recovery_fee', 'last_payment_amount', 'collections_12_mths_ex_med']
+        for colm in Cont_data_columns:
+            column_of_interest = colm
+            self.df_raw.boxplot(column=column_of_interest)
+            plot.show()
+            
+    #to see categorical data outliers, you just need to call show_dpd = visuals.show_disc_prob_distr()   . 
         
 visuals = Plotter(df_raw)
 
 null_values = visuals.show_null_values()
 
-nd_funded_amount = visuals.test_norm_distr_funded_amount()
+test_nd = visuals.test_normal_distribution()
 
-nd_int_rate = visuals.test_norm_distr_int_rate()
+show_dpd = visuals.show_disc_prob_distr()
 
-nd_collections_12_mths_ex_med = visuals.test_norm_distr_collections_12_mths_ex_med()
+show_skew = visuals.show_skewness()
 
-dpd_term = visuals.show_disc_prob_distr_term()
+show_cont_outliers = visuals.show_cont_data_outliers()
 
-dpd_employment_length = visuals.show_disc_prob_distr_employment_length()
-
-skew_loan_amount = visuals.show_skewness_loan_amount()
-
-skew_funded_amount = visuals.show_skewness_funded_amount()
-
-skew_funded_amount_inv = visuals.show_skewness_funded_amount_inv()
-
-skew_int_rate = visuals.show_skewness_int_rate()
-
-skew_instalment = visuals.show_skewness_instalment()
-
-skew_annual_inc = visuals.show_skewness_annual_inc()
-
-skew_dti = visuals.show_skewness_dti()
-
-skew_delinq_2yrs = visuals.show_skewness_delinq_2yrs()
-
-skew_inq_last_6mths = visuals.show_skewness_inq_last_6mths()
-
-skew_open_accounts = visuals.show_skewness_open_accounts()
-
-skew_total_accounts = visuals.show_skewness_total_accounts()
-
-skew_out_prncp = visuals.show_skewness_out_prncp()
-
-skew_out_prncp_inv = visuals.show_skewness_out_prncp_inv()
-
-skew_total_payment = visuals.show_skewness_total_payment()
-
-skew_total_rec_prncp = visuals.show_skewness_total_rec_prncp()
 # %%
-class DataFrameTransform:
+class DataFrameNanTransform:
     
     def __init__(self, df_raw):
         self.df_raw = df_raw
         
-    def impute_funded_amount(self):
-        self.df_raw["funded_amount"] = self.df_raw["funded_amount"].fillna(self.df_raw["funded_amount"].median())
-        print(self.df_raw["funded_amount"].info(), "\n")
+    def impute_with_median(self):
+        median_columns = ["funded_amount", "int_rate", "collections_12_mths_ex_med"]
+        for column in median_columns:
+            self.df_raw[column] = self.df_raw[column].fillna(self.df_raw[column].median())
+            print(self.df_raw[column].info(), "\n")
         
-    def impute_int_rate(self):
-        self.df_raw["int_rate"] = self.df_raw["int_rate"].fillna(self.df_raw["int_rate"].median())
-        print(self.df_raw["int_rate"].info(), "\n")
-        
-    def impute_collections_12_mths_ex_med(self):
-        self.df_raw["collections_12_mths_ex_med"] = self.df_raw["collections_12_mths_ex_med"].fillna(self.df_raw["collections_12_mths_ex_med"].median())
-        print(self.df_raw["collections_12_mths_ex_med"].info(), "\n")
-        
-    def impute_term(self):
-        self.df_raw["term"] = self.df_raw["term"].fillna(self.df_raw["term"].mode()[0])
-        print(self.df_raw["term"].info(), "\n")
-        
-    def impute_employment_length(self):
-        self.df_raw["employment_length"] = self.df_raw["employment_length"].fillna(self.df_raw["employment_length"].mode()[0])
-        print(self.df_raw["employment_length"].info(), "\n")
+    def impute_with_mode(self):
+        mode_columns = ["term", "employment_length"]
+        for mod_column in mode_columns:
+            self.df_raw[mod_column] = self.df_raw[mod_column].fillna(self.df_raw[mod_column].mode()[0])
+            print(self.df_raw[mod_column].info(), "\n")
     
     def drop_rows_last_payment_date(self):
         self.df_raw.dropna(how="any", subset=["last_payment_date"], inplace=True)
@@ -299,17 +180,11 @@ class DataFrameTransform:
         self.df_raw = self.df_raw.drop(columns=["mths_since_last_delinq", "mths_since_last_record", "next_payment_date", "mths_since_last_major_derog"], inplace=True)
         
         
-df_transform = DataFrameTransform(df_raw)
+df_transform = DataFrameNanTransform(df_raw)
 
-no_nan_funded_amount = df_transform.impute_funded_amount()
+med_columns = df_transform.impute_with_median()
 
-no_nan_int_rate = df_transform.impute_int_rate()
-
-no_nan_coll_12_mths_ex_med = df_transform.impute_collections_12_mths_ex_med()
-
-no_nan_term = df_transform.impute_term()
-
-no_nan_employment_length = df_transform.impute_employment_length()
+mod_columns = df_transform.impute_with_mode()
 
 df_transform.drop_rows_last_payment_date()
 
@@ -334,127 +209,166 @@ class DataFrameSkewTransform:
     def __init__(self, df_raw):
         self.df_raw = df_raw
         
-    def transform_skew_loan_amount(self):
-        self.df_raw["loan_amount"] = self.df_raw.loan_amount**(1/2)
-        visuals.show_skewness_loan_amount() #Result of square Root Transformation: 0.165
+    def transform_skew_square_root(self):
+        columns = ["loan_amount", "funded_amount", "funded_amount_inv", "instalment", "total_accounts", "total_payment", "total_rec_prncp"]
+        for clm in columns:
+            self.df_raw[clm] = self.df_raw[clm]**(1/2)
+            
+    def transform_skew_log(self):
+        log_columns = ["annual_inc", "open_accounts"]
+        for colm in log_columns:
+            self.df_raw[colm] = self.df_raw[colm].map(lambda i: np.log(i) if i>0 else 0)
+            t=sns.histplot(self.df_raw[colm],label="Skewness: %.2f"%(self.df_raw[colm].skew()))
+            t.legend()
+            
+    def transform_skew_yeojohnson(self):
+        yeo_columns = ["delinq_2yrs", "inq_last_6mths", "out_prncp", "out_prncp_inv"]
+        for colmn in yeo_columns:
+            yeojohnson_colmn = self.df_raw[colmn]
+            yeojohnson_colmn = stats.yeojohnson(yeojohnson_colmn)
+            yeojohnson_colmn = pd.Series(yeojohnson_colmn[0])
+            self.df_raw[colmn] = yeojohnson_colmn
+            t=sns.histplot(yeojohnson_colmn, label="Skewness: %.2f"%(yeojohnson_colmn.skew()))
+            t.legend()
         
-    def transform_skew_funded_amount(self):
-        self.df_raw["funded_amount"] = self.df_raw.funded_amount**(1/2) 
-        visuals.show_skewness_funded_amount() # Result of Square Root Transformation is working: 0.180
+    #Result of square Root Transformation for "loan_amount": 0.165
         
-    def transform_skew_funded_amount_inv(self):
-        self.df_raw["funded_amount_inv"] = self.df_raw.funded_amount_inv**(1/2)
-        visuals.show_skewness_funded_amount_inv() # Result of square Root Transformation: 0.072
+    # Result of Square Root Transformation for "funded_amount": 0.180
         
-    def transform_skew_instalment(self):
-        self.df_raw["instalment"] = self.df_raw.instalment**(1/2) # Result of square Root Transformation: 0.246
-        visuals.show_skewness_instalment()
+    # Result of square Root Transformation for "funded_amount_inv": 0.072
         
-    def transform_skew_annual_inc(self):
-        self.df_raw["annual_inc"] = self.df_raw["annual_inc"].map(lambda i: np.log(i) if i>0 else 0)
-        t=sns.histplot(self.df_raw["annual_inc"],label="Skewness: %.2f"%(self.df_raw["annual_inc"].skew()))
-        t.legend() # Result of log transformation: 0.14
-        visuals.show_skewness_annual_inc()
+    # Result of square Root Transformation for "instalment": 0.246
         
-    def transform_skew_delinq_2yrs(self):
-        yeojohnson_delinq_2yrs = self.df_raw["delinq_2yrs"]
-        yeojohnson_delinq_2yrs = stats.yeojohnson(yeojohnson_delinq_2yrs)
-        yeojohnson_delinq_2yrs = pd.Series(yeojohnson_delinq_2yrs[0])
-        self.df_raw["delinq_2yrs"] = yeojohnson_delinq_2yrs
-        t=sns.histplot(yeojohnson_delinq_2yrs, label="Skewness: %.2f"%(yeojohnson_delinq_2yrs.skew()))
-        t.legend() #Result of Yeo-Johnson transformation: 1.87(lowest result in comparison to other methods).
-        visuals.show_skewness_delinq_2yrs()
+    # Result for log transformation for "annual_inc": 0.14
         
-    def transform_skew_inq_last_6mths(self):
-        yeojohnson_inq_last_6mths = self.df_raw["inq_last_6mths"]
-        yeojohnson_inq_last_6mths = stats.yeojohnson(yeojohnson_inq_last_6mths)
-        yeojohnson_inq_last_6mths = pd.Series(yeojohnson_inq_last_6mths[0])
-        self.df_raw["inq_last_6mths"] = yeojohnson_inq_last_6mths
-        t=sns.histplot(yeojohnson_inq_last_6mths, label="Skewness: %.2f"%(yeojohnson_inq_last_6mths.skew()))
-        t.legend() # Result of Yeo-Johnson transformation: 0.25
-        visuals.show_skewness_inq_last_6mths()
+    #  of Yeo-Johnson transformation for "delinq_2yrs": 1.87(lowest result in comparison to other methods).
         
-    def transform_skew_open_accounts(self):
-        self.df_raw["open_accounts"] = self.df_raw["open_accounts"].map(lambda i: np.log(i) if i>0 else 0)
-        t=sns.histplot(self.df_raw["open_accounts"],label="Skewness: %.2f"%(self.df_raw["open_accounts"].skew()))
-        t.legend() # Result of a log transformation: -0.47
-        visuals.show_skewness_open_accounts()
+    # Result of Yeo-Johnson transformation for "inq_last_6mths": 0.25
         
-    def transform_skew_total_accounts(self):
-        self.df_raw["total_accounts"] = self.df_raw.total_accounts**(1/2) # Result of a Square Root Transformation: 0.109
-        visuals.show_skewness_total_accounts()
+    # Result of a log transformation for "open_accounts": -0.47
         
-    def transform_skew_out_prncp(self):
-        yeojohnson_out_prncp = self.df_raw["out_prncp"]
-        yeojohnson_out_prncp = stats.yeojohnson(yeojohnson_out_prncp)
-        yeojohnson_out_prncp = pd.Series(yeojohnson_out_prncp[0])
-        self.df_raw["out_prncp"] = yeojohnson_out_prncp
-        t=sns.histplot(yeojohnson_out_prncp, label="Skewness: %.2f"%(yeojohnson_out_prncp.skew()))
-        t.legend() # Result of Yeo-Johnson method: 0.53 (lowest result)
-        visuals.show_skewness_out_prncp()
+    # Result of a Square Root Transformation for "total_accounts": 0.109
         
-    def transform_skew_out_prncp_inv(self):
-        yeojohnson_out_prncp_inv = self.df_raw["out_prncp_inv"]
-        yeojohnson_out_prncp_inv = stats.yeojohnson(yeojohnson_out_prncp_inv)
-        yeojohnson_out_prncp_inv = pd.Series(yeojohnson_out_prncp_inv[0])
-        self.df_raw["out_prncp_inv"] = yeojohnson_out_prncp_inv
-        t=sns.histplot(yeojohnson_out_prncp_inv, label="Skewness: %.2f"%(yeojohnson_out_prncp_inv.skew()))
-        t.legend() # Result of Yeo-Johnson method: 0.53 (lowest result)
-        visuals.show_skewness_out_prncp_inv()
+    # Result of Yeo-Johnson method for "out_prncp": 0.53 (lowest result)
         
-    def transform_skew_total_payment(self):
-        self.df_raw["total_payment"] = self.df_raw.total_payment**(1/2) # Result of Square Root transformation: 0.374
-        visuals.show_skewness_total_payment()
+    # Result of Yeo-Johnson method for "out_prncp_inv": 0.53 (lowest result)
         
-    def transform_skew_total_rec_prncp(self):
-        self.df_raw["total_rec_prncp"] = self.df_raw.total_rec_prncp**(1/2) # Result of Square Root transformation: 0.369
-        visuals.show_skewness_total_rec_prncp()
+    # Result of Square Root transformation for "total_payment": 0.374
+        
+    # Result of Square Root transformation for "total_rec_prncp": 0.369
         
         
 skew_transform = DataFrameSkewTransform(df_raw)
 
-skew_transform.transform_skew_loan_amount()
+transform_square_root = skew_transform.transform_skew_square_root()
 
-skew_transform.transform_skew_funded_amount()
+transform_log = skew_transform.transform_skew_log()
 
-skew_transform.transform_skew_funded_amount_inv()
+transform_yeo = skew_transform.transform_skew_yeojohnson()
 
-skew_transform.transform_skew_instalment()
-
-skew_transform.transform_skew_annual_inc()
-
-skew_transform.transform_skew_delinq_2yrs()
-
-skew_transform.transform_skew_inq_last_6mths()
-
-skew_transform.transform_skew_open_accounts()
-
-skew_transform.transform_skew_total_accounts()
-
-skew_transform.transform_skew_out_prncp()
-
-skew_transform.transform_skew_out_prncp_inv()
-
-skew_transform.transform_skew_total_payment()
-
-skew_transform.transform_skew_total_rec_prncp()
+show_skew = visuals.show_skewness()
     
+# %%
+
+class DataFrameOutliersTransform:
+    
+    def __init__(self, df_raw):
+        self.df_raw = df_raw
+        
+    def categ_data_outliers_transform(self):
+        self.df_raw["home_ownership"].replace({"None": "Other"}, inplace=True)
+        self.df_raw["loan_status"].replace({"Does not meet the credit policy. Status:Charged Off": "Charged Off"}, inplace=True)
+        self.df_raw["loan_status"].replace({"Does not meet the credit policy. Status:Fully Paid": "Fully Paid"}, inplace=True)
+        self.df_raw = self.df_raw.drop(self.df_raw[self.df_raw['payment_plan'] == 'y'].index)
+        visuals.show_disc_prob_distr()
+        
+    def iqr_outliers_removal(self):
+        iqr_columns = ["funded_amount_inv", "delinq_2yrs", "total_rec_prncp", "collections_12_mths_ex_med", "int_rate", "instalment", "dti", "total_payment", "total_payment_inv"]
+        for iqr_colm in iqr_columns:
+            Q1 = df_raw[iqr_colm].quantile(0.25)
+            Q3 = df_raw[iqr_colm].quantile(0.75)
+            IQR = Q3 - Q1
+            threshold = 1.5
+            df_raw.loc[df_raw[(df_raw[iqr_colm] < Q1 - threshold * IQR) | (df_raw[iqr_colm] > Q3 + threshold * IQR)]]
+            #outliers = df_raw[(df_raw[iqr_colm] < Q1 - threshold * IQR) | (df_raw[iqr_colm] > Q3 + threshold * IQR)]
+            self.df_raw[iqr_colm] = self.df_raw[iqr_colm].drop(list(outliers.index))
+            #column_of_interest = iqr_colm       #graphic check if worked.
+            #self.df_raw.boxplot(column=column_of_interest)
+            #plot.show()
+    def flooring_capping_outliers_removal(self):
+        floor_cap_columns = ["annual_inc", "open_accounts", "total_accounts"]
+        for fl_cp_column in floor_cap_columns:
+            flooring = self.df_raw[fl_cp_column].quantile(0.10)
+            capping = self.df_raw[fl_cp_column].quantile(0.90)
+            print(f'The flooring for the lower values is: {flooring}')
+            print(f'The capping for the higher values is: {capping}')
+            self.df_raw[fl_cp_column] = self.df_raw.where(self.df_raw[fl_cp_column] <flooring, flooring,self.df_raw[fl_cp_column])
+            self.df_raw[fl_cp_column] = self.df_raw.where(self.df_raw[fl_cp_column] >capping, capping,self.df_raw[fl_cp_column])
+            #self.df_raw[fl_cp_column] = np.where(self.df_raw[fl_cp_column] <flooring, flooring,self.df_raw[fl_cp_column])
+            #self.df_raw[fl_cp_column] = np.where(self.df_raw[fl_cp_column] >capping, capping,self.df_raw[fl_cp_column])
+            #column_of_interest = fl_cp_column     #graphic check if worked.
+            #self.df_raw.boxplot(column=column_of_interest)
+            #plot.show()
+            
+    def transform_outliers_median(self):
+        outliers_median = ["total_rec_int", "total_rec_late_fee", "recoveries", "collection_recovery_fee", "last_payment_amount"]
+        for out_med_column in outliers_median:
+            median = self.df_raw[out_med_column].quantile(0.50)
+            high_percentile = self.df_raw[out_med_column].quantile(0.95)
+            print(f'The median value of {out_med_column} is {median}') 
+            print(f'The 95th percentile value of {out_med_column} is {high_percentile}') 
+            self.df_raw[out_med_column] = self.df_raw.where(self.df_raw[out_med_column] > high_percentile, median, self.df_raw[out_med_column])
+            #self.df_raw[out_med_column] = np.where(self.df_raw[out_med_column] > high_percentile, median, self.df_raw[out_med_column])
+            column_of_interest = out_med_column
+            df_raw.boxplot(column=column_of_interest)
+            plot.show()
+
+outl_transform = DataFrameOutliersTransform(df_raw)
+
+outl_transform.categ_data_outliers_transform()
+
+outl_transform.iqr_outliers_removal()
+
+outl_transform.flooring_capping_outliers_removal()
+
+outl_transform.transform_outliers_median()
+
+show_cont_outliers = visuals.show_cont_data_outliers() #show graphs to check if outliers were successfully removed.
 # %%
 df_raw.info()
 
+show_cont_outliers = visuals.show_cont_data_outliers()
+
+show_dpd = visuals.show_disc_prob_distr()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# drafts below................................................................................................
+
+
 # %%
 plot.figure(figsize=(10, 5))
-sns.histplot(df_raw["loan_amount"], bins=40, kde=False)
-plot.title("Histogram of loan amount")
+sns.histplot(df_raw["annual_inc"], bins=40, kde=False)
+plot.title("Histogram of annual_inc")
 plot.xlabel('£ (pounds)')
 plot.ylabel('Frequency')
 plot.show()
-
-# %%
-import seaborn as sns
-
-sns.violinplot(data=df_raw, y="loan_amount")
-sns.despine()
 
 # %%
 
@@ -475,23 +389,155 @@ column_of_interest = 'funded_amount_inv'
 df_raw.boxplot(column=column_of_interest)
 plot.show()
 # %%
-Q1 = df_raw['loan_amount'].quantile(0.25)
-Q3 = df_raw['loan_amount'].quantile(0.75)
+Q1 = df_raw['int_rate'].quantile(0.25)
+Q3 = df_raw['int_rate'].quantile(0.75)
+IQR = Q3 - Q1
+
+print(f"Q1 (25th percentile): {Q1}")
+print(f"Q3 (25th percentile): {Q3}")
+print(f"IQR: {IQR}")
+
+threshold = 1.5
+outliers = df_raw['int_rate'][(df_raw['int_rate'] < (Q1 - threshold * IQR)) | (df_raw['int_rate'] > (Q3 + threshold * IQR))]
+
+print("Outliers:")
+print(outliers)
+
+df_raw["int_rate"].value_counts()[25.99]
+
+# %%
+Q1 = df_raw['funded_amount_inv'].quantile(0.25)
+Q3 = df_raw['funded_amount_inv'].quantile(0.75)
 IQR = Q3 - Q1
 
 threshold = 1.5
-outliers = df_raw[(df_raw['loan_amount'] < Q1 - threshold * IQR) | (df_raw['loan_amount'] > Q3 + threshold * IQR)]
+outliers = df_raw[(df_raw['funded_amount_inv'] < Q1 - threshold * IQR) | (df_raw['funded_amount_inv'] > Q3 + threshold * IQR)]
+# %%
 
-#print(IQR)
-print(outliers)
-
-
-
+df_raw["funded_amount_inv"] = df_raw["funded_amount_inv"].drop(outliers.index)
+# %%
 
 
+#graphing each continious data column to see the outliers. 
+
+Cont_data_columns = ['loan_amount', 'funded_amount', 'funded_amount_inv', 'int_rate', 'instalment', 'annual_inc', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'open_accounts', 'total_accounts', 'out_prncp', 'out_prncp_inv', 'total_payment', 'total_payment_inv', 'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries', 'collection_recovery_fee', 'last_payment_amount', 'collections_12_mths_ex_med']
+for colm in Cont_data_columns:
+    column_of_interest = colm
+    df_raw.boxplot(column=column_of_interest)
+    plot.show()
+
+# %%
+df_raw.shape
+# %%
+show_cont_outliers = visuals.show_cont_data_outliers()
+# no outliers in "loan_amount", "funded_amount", "inq_last_6mths", "out_prncp", "out_prncp_inv".
+# %%
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+# Removing outliers for columns that do not have many outliers ("funded_amount_inv", "delinq_2yrs", "total_rec_prncp", "collections_12_mths_ex_med")
+
+Q1 = df_raw['funded_amount_inv'].quantile(0.25)
+Q3 = df_raw['funded_amount_inv'].quantile(0.75)
+IQR = Q3 - Q1
+
+threshold = 1.5
+outliers = df_raw[(df_raw['funded_amount_inv'] < Q1 - threshold * IQR) | (df_raw['funded_amount_inv'] > Q3 + threshold * IQR)]
+
+
+df_raw["funded_amount_inv"] = df_raw["funded_amount_inv"].drop(outliers.index)
+# %%
+#Plotting how it looks like after removing outliers:
+column_of_interest = 'funded_amount_inv'
+df_raw.boxplot(column=column_of_interest)
+plot.show()
+# %%
+iqr_columns = ["funded_amount_inv", "delinq_2yrs", "total_rec_prncp", "collections_12_mths_ex_med"]
+for iqr_colm in iqr_columns:
+    Q1 = df_raw[iqr_colm].quantile(0.25)
+    Q3 = df_raw[iqr_colm].quantile(0.75)
+    IQR = Q3 - Q1
+    threshold = 1.5
+    outliers = df_raw[(df_raw[iqr_colm] < Q1 - threshold * IQR) | (df_raw[iqr_colm] > Q3 + threshold * IQR)]
+    df_raw[iqr_colm] = df_raw[iqr_colm].drop(outliers.index)
+    column_of_interest = iqr_colm
+    df_raw.boxplot(column=column_of_interest)
+    plot.show()
+    
+# %%
+# Quantile-based flooring and capping (for "annual_inc", "open_accounts", "total_accounts")
+floor_cap_columns = ["annual_inc", "open_accounts", "total_accounts"]
+for fl_cp_column in floor_cap_columns:
+    flooring = df_raw[fl_cp_column].quantile(0.10)
+    capping = df_raw[fl_cp_column].quantile(0.90)
+    print(f'The flooring for the lower values is: {flooring}')
+    print(f'The capping for the higher values is: {capping}')
+    df_raw[fl_cp_column] = np.where(df_raw[fl_cp_column] <flooring, flooring,df_raw[fl_cp_column])
+    df_raw[fl_cp_column] = np.where(df_raw[fl_cp_column] >capping, capping,df_raw[fl_cp_column])
+    column_of_interest = fl_cp_column
+    df_raw.boxplot(column=column_of_interest)
+    plot.show()
+
+
+
+
+# %%
+flooring = df_raw["annual_inc"].quantile(0.10)
+capping = df_raw["annual_inc"].quantile(0.90)
+print(f'The flooring for the lower values is: {df_raw["annual_inc"].quantile(0.10)}')
+print(f'The capping for the higher values is: {df_raw["annual_inc"].quantile(0.90)}')
+
+df_raw["annual_inc"] = np.where(df_raw["annual_inc"] <flooring, flooring,df_raw['annual_inc'])
+df_raw["annual_inc"] = np.where(df_raw["annual_inc"] >capping, capping,df_raw['annual_inc'])
+print(df_raw['annual_inc'].skew())
+
+column_of_interest = "annual_inc"
+df_raw.boxplot(column=column_of_interest)
+plot.show()
+
+# %%
+df_raw.info()
+df_raw.shape
+
+# %% test how outlier removal worked:
+
+
+column_of_interest = "annual_inc"
+df_raw.boxplot(column=column_of_interest)
+plot.show()
+# %%
+df_raw["last_payment_amount"].value_counts().sum
+# %%
+plot.figure(figsize=(10, 5))
+sns.histplot(df_raw["annual_inc"], bins=40, kde=False)
+plot.title("Histogram of annual_inc")
+plot.xlabel('£ (pounds)')
+plot.ylabel('Frequency')
+plot.show()
+
+# %%
+outliers_median = ["total_rec_int", "total_rec_late_fee", "recoveries", "collection_recovery_fee", "last_payment_amount"]
+for out_med_column in outliers_median:
+    median = df_raw[out_med_column].quantile(0.50)
+    high_percentile = df_raw[out_med_column].quantile(0.95)
+    print(f'The median value of {out_med_column} is {median}') 
+    print(f'The 95th percentile value of {out_med_column} is {high_percentile}') 
+    df_raw[out_med_column] = np.where(df_raw[out_med_column] > high_percentile, median, df_raw[out_med_column])
+    column_of_interest = out_med_column
+    df_raw.boxplot(column=column_of_interest)
+    plot.show()  # is it changing the graphs? look at the skews maybe?
 
 
 
