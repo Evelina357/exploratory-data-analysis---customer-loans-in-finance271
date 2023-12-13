@@ -285,11 +285,11 @@ class DataFrameOutliersTransform:
     def iqr_outliers_removal(self):
         iqr_columns = ["funded_amount_inv", "delinq_2yrs", "total_rec_prncp", "collections_12_mths_ex_med", "int_rate", "instalment", "dti", "total_payment", "total_payment_inv"]
         for iqr_colm in iqr_columns:
-            Q1 = df_raw[iqr_colm].quantile(0.25)
-            Q3 = df_raw[iqr_colm].quantile(0.75)
+            Q1 = self.df_raw[iqr_colm].quantile(0.25)
+            Q3 = self.df_raw[iqr_colm].quantile(0.75)
             IQR = Q3 - Q1
             threshold = 1.5
-            df_raw.loc[df_raw[(df_raw[iqr_colm] < Q1 - threshold * IQR) | (df_raw[iqr_colm] > Q3 + threshold * IQR)]]
+            self.df_raw.loc[self.df_raw[(self.df_raw[iqr_colm] < Q1 - threshold * IQR) | (self.df_raw[iqr_colm] > Q3 + threshold * IQR)]]
             #outliers = df_raw[(df_raw[iqr_colm] < Q1 - threshold * IQR) | (df_raw[iqr_colm] > Q3 + threshold * IQR)]
             self.df_raw[iqr_colm] = self.df_raw[iqr_colm].drop(list(outliers.index))
             #column_of_interest = iqr_colm       #graphic check if worked.
