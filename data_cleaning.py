@@ -289,9 +289,9 @@ class DataFrameOutliersTransform:
             Q3 = self.df_raw[iqr_colm].quantile(0.75)
             IQR = Q3 - Q1
             threshold = 1.5
-            self.df_raw.loc[self.df_raw[(self.df_raw[iqr_colm] < Q1 - threshold * IQR) | (self.df_raw[iqr_colm] > Q3 + threshold * IQR)]]
-            #outliers = df_raw[(df_raw[iqr_colm] < Q1 - threshold * IQR) | (df_raw[iqr_colm] > Q3 + threshold * IQR)]
-            self.df_raw[iqr_colm] = self.df_raw[iqr_colm].drop(list(outliers.index))
+            #self.df_raw.loc[self.df_raw[(self.df_raw[iqr_colm] < Q1 - threshold * IQR) | (self.df_raw[iqr_colm] > Q3 + threshold * IQR)]]
+            outliers = self.df_raw[(self.df_raw[iqr_colm] < Q1 - threshold * IQR) | (self.df_raw[iqr_colm] > Q3 + threshold * IQR)]
+            self.df_raw = self.df_raw.drop(index=list(outliers.index))
             #column_of_interest = iqr_colm       #graphic check if worked.
             #self.df_raw.boxplot(column=column_of_interest)
             #plot.show()
@@ -300,10 +300,12 @@ class DataFrameOutliersTransform:
         for fl_cp_column in floor_cap_columns:
             flooring = self.df_raw[fl_cp_column].quantile(0.10)
             capping = self.df_raw[fl_cp_column].quantile(0.90)
-            print(f'The flooring for the lower values is: {flooring}')
-            print(f'The capping for the higher values is: {capping}')
-            self.df_raw[fl_cp_column] = self.df_raw.where(self.df_raw[fl_cp_column] <flooring, flooring,self.df_raw[fl_cp_column])
-            self.df_raw[fl_cp_column] = self.df_raw.where(self.df_raw[fl_cp_column] >capping, capping,self.df_raw[fl_cp_column])
+            print(f'The flooring for the lower values of {fl_cp_column} is: {flooring}')
+            print(f'The capping for the higher values of {fl_cp_column} is: {capping}')
+            print(len(self.df_raw))
+            self.df_raw = self.df_raw.where(self.df_raw[fl_cp_column] > flooring, other=flooring)
+            self.df_raw = self.df_raw.where(self.df_raw[fl_cp_column] < capping, other=capping)
+            print(len(self.df_raw))
             #self.df_raw[fl_cp_column] = np.where(self.df_raw[fl_cp_column] <flooring, flooring,self.df_raw[fl_cp_column])
             #self.df_raw[fl_cp_column] = np.where(self.df_raw[fl_cp_column] >capping, capping,self.df_raw[fl_cp_column])
             #column_of_interest = fl_cp_column     #graphic check if worked.
@@ -312,16 +314,19 @@ class DataFrameOutliersTransform:
             
     def transform_outliers_median(self):
         outliers_median = ["total_rec_int", "total_rec_late_fee", "recoveries", "collection_recovery_fee", "last_payment_amount"]
+        print("HERE")
         for out_med_column in outliers_median:
             median = self.df_raw[out_med_column].quantile(0.50)
             high_percentile = self.df_raw[out_med_column].quantile(0.95)
             print(f'The median value of {out_med_column} is {median}') 
             print(f'The 95th percentile value of {out_med_column} is {high_percentile}') 
-            self.df_raw[out_med_column] = self.df_raw.where(self.df_raw[out_med_column] > high_percentile, median, self.df_raw[out_med_column])
+            print(len(self.df_raw))
+            self.df_raw = self.df_raw.where(self.df_raw[out_med_column] > high_percentile, other=median)
             #self.df_raw[out_med_column] = np.where(self.df_raw[out_med_column] > high_percentile, median, self.df_raw[out_med_column])
+            print(len(self.df_raw))
             column_of_interest = out_med_column
-            df_raw.boxplot(column=column_of_interest)
-            plot.show()
+            #df_raw.boxplot(column=column_of_interest)
+            #plot.show()
 
 outl_transform = DataFrameOutliersTransform(df_raw)
 
@@ -333,11 +338,15 @@ outl_transform.flooring_capping_outliers_removal()
 
 outl_transform.transform_outliers_median()
 
-show_cont_outliers = visuals.show_cont_data_outliers() #show graphs to check if outliers were successfully removed.
+#show_cont_outliers = visuals.show_cont_data_outliers() #show graphs to check if outliers were successfully removed.
 # %%
 df_raw.info()
 
+# %%
+
 show_cont_outliers = visuals.show_cont_data_outliers()
+
+# %%
 
 show_dpd = visuals.show_disc_prob_distr()
 
