@@ -269,6 +269,11 @@ transform_yeo = skew_transform.transform_skew_yeojohnson()
 show_skew = visuals.show_skewness()
     
 # %%
+show_cont_outliers = visuals.show_cont_data_outliers() 
+
+#df_raw[df_raw['collections_12_mths_ex_med']==df_raw['collections_12_mths_ex_med'].max()]
+
+#%%
 
 class DataFrameOutliersTransform:
     
@@ -285,21 +290,51 @@ class DataFrameOutliersTransform:
     def iqr_outliers_removal(self):
         iqr_columns = ["funded_amount_inv", "delinq_2yrs", "total_rec_prncp", "collections_12_mths_ex_med", "int_rate", "instalment", "dti", "total_payment", "total_payment_inv"]
         for iqr_colm in iqr_columns:
-            Q1 = self.df_raw[iqr_colm].quantile(0.25)
-            Q3 = self.df_raw[iqr_colm].quantile(0.75)
+            Q1 = np.quantile(self.df_raw[iqr_colm], 0.25)
+            Q3 = np.quantile(self.df_raw[iqr_colm], 0.75)
+            print(Q1)
+            print(Q3)
+            #Q1 = self.df_raw[iqr_colm].quantile(0.25)
+            #Q3 = self.df_raw[iqr_colm].quantile(0.75)
             IQR = Q3 - Q1
             threshold = 1.5
+            outliers = self.df_raw[(self.df_raw[iqr_colm] < (Q1 - (threshold * IQR))) | (self.df_raw[iqr_colm] > (Q3 + (threshold * IQR)))]
+            print(outliers)
+            print(self.df_raw)
+            self.df_raw = self.df_raw.drop(index=outliers.index)
+        visuals = Plotter(self.df_raw)
+        return visuals.show_cont_data_outliers()
+        
+        
+        #self.df_raw.loc[self.df_raw[(self.df_raw[iqr_colm] < Q1 - threshold * IQR) | (self.df_raw[iqr_colm] > Q3 + threshold * IQR)]]
+        #self.df_raw = self.df_raw.drop(index=list(outliers.index))
+        
+        
+        #outliers_mask = (self.df_raw[iqr_colm] < (Q1 - threshold * IQR)) | (self.df_raw[iqr_colm] > (Q3 + threshold * IQR))
+        #df_no_outliers = self.df_raw[~outliers_mask]
+        #return df_no_outliers
+        
+        
+        #iqr_columns = ["funded_amount_inv", "delinq_2yrs", "total_rec_prncp", "collections_12_mths_ex_med", "int_rate", "instalment", "dti", "total_payment", "total_payment_inv"]
+        #for iqr_colm in iqr_columns:
+            #Q1 = self.df_raw[iqr_colm].quantile(0.25)
+            #Q3 = self.df_raw[iqr_colm].quantile(0.75)
+            #IQR = Q3 - Q1
+            #threshold = 1.5
+            #outliers = self.df_raw[(self.df_raw[iqr_colm] < Q1 - threshold * IQR) | (self.df_raw[iqr_colm] > Q3 + threshold * IQR)]
+            
             #self.df_raw.loc[self.df_raw[(self.df_raw[iqr_colm] < Q1 - threshold * IQR) | (self.df_raw[iqr_colm] > Q3 + threshold * IQR)]]
-            outliers = self.df_raw[(self.df_raw[iqr_colm] < Q1 - threshold * IQR) | (self.df_raw[iqr_colm] > Q3 + threshold * IQR)]
-            self.df_raw = self.df_raw.drop(index=list(outliers.index))
             #column_of_interest = iqr_colm       #graphic check if worked.
             #self.df_raw.boxplot(column=column_of_interest)
             #plot.show()
+            
     def flooring_capping_outliers_removal(self):
         floor_cap_columns = ["annual_inc", "open_accounts", "total_accounts"]
         for fl_cp_column in floor_cap_columns:
-            flooring = self.df_raw[fl_cp_column].quantile(0.10)
-            capping = self.df_raw[fl_cp_column].quantile(0.90)
+            flooring = np.quantile(self.df_raw[fl_cp_column], 0.10)
+            capping = np.quantile(self.df_raw[fl_cp_column], 0.90)
+            #flooring = self.df_raw[fl_cp_column].quantile(0.10)
+            #capping = self.df_raw[fl_cp_column].quantile(0.90)
             print(f'The flooring for the lower values of {fl_cp_column} is: {flooring}')
             print(f'The capping for the higher values of {fl_cp_column} is: {capping}')
             print(len(self.df_raw))
@@ -311,22 +346,32 @@ class DataFrameOutliersTransform:
             #column_of_interest = fl_cp_column     #graphic check if worked.
             #self.df_raw.boxplot(column=column_of_interest)
             #plot.show()
+        visuals = Plotter(self.df_raw)
+        return visuals.show_cont_data_outliers()
+            
             
     def transform_outliers_median(self):
         outliers_median = ["total_rec_int", "total_rec_late_fee", "recoveries", "collection_recovery_fee", "last_payment_amount"]
         print("HERE")
         for out_med_column in outliers_median:
-            median = self.df_raw[out_med_column].quantile(0.50)
-            high_percentile = self.df_raw[out_med_column].quantile(0.95)
+            median = np.quantile(self.df_raw[out_med_column], 0.50)
+            high_percentile = np.quantile(self.df_raw[out_med_column], 0.99)
+            #median = self.df_raw[out_med_column].quantile(0.50)
+            #high_percentile = self.df_raw[out_med_column].quantile(0.95)
             print(f'The median value of {out_med_column} is {median}') 
             print(f'The 95th percentile value of {out_med_column} is {high_percentile}') 
             print(len(self.df_raw))
-            self.df_raw = self.df_raw.where(self.df_raw[out_med_column] > high_percentile, other=median)
-            #self.df_raw[out_med_column] = np.where(self.df_raw[out_med_column] > high_percentile, median, self.df_raw[out_med_column])
+            #self.df_raw = self.df_raw.where(self.df_raw[out_med_column] > high_percentile, other=median)
+            self.df_raw[out_med_column] = np.where(self.df_raw[out_med_column] > high_percentile, median, self.df_raw[out_med_column])
             print(len(self.df_raw))
-            column_of_interest = out_med_column
+            #column_of_interest = out_med_column
             #df_raw.boxplot(column=column_of_interest)
             #plot.show()
+        visuals = Plotter(self.df_raw)
+        print(len(self.df_raw))
+        return visuals.show_cont_data_outliers()
+    
+            
 
 outl_transform = DataFrameOutliersTransform(df_raw)
 
@@ -338,9 +383,6 @@ outl_transform.flooring_capping_outliers_removal()
 
 outl_transform.transform_outliers_median()
 
-#show_cont_outliers = visuals.show_cont_data_outliers() #show graphs to check if outliers were successfully removed.
-# %%
-df_raw.info()
 
 # %%
 
@@ -369,7 +411,15 @@ show_dpd = visuals.show_disc_prob_distr()
 
 
 # drafts below................................................................................................
+#%%
+#shows correlation between all columns containing continuous data.
 
+df_raw_continuous = df_raw[["loan_amount", "funded_amount", "funded_amount_inv", "int_rate", "instalment", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_accounts", "total_accounts", "out_prncp", "out_prncp_inv", "total_payment", "total_payment_inv", "total_rec_prncp", "total_rec_int", "total_rec_late_fee","recoveries", "collection_recovery_fee", "last_payment_amount", "collections_12_mths_ex_med"]]
+
+import plotly.express as px 
+px.imshow(df_raw_continuous.corr(), title="Correlation heatmap of all columns")
+
+# ValueError: Mime type rendering requires nbformat>=4.2.0 but it is not installed? would this change the correlation heatmap?
 
 # %%
 plot.figure(figsize=(10, 5))
