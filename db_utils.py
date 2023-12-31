@@ -9,16 +9,6 @@ def load_credentials_file():
     return cred
 
 credentials = load_credentials_file()
-'''
-Creates a function which loads the credentials.yaml file. 
-
-Credentials.yaml file stores the AWS RDS database credentials (ignored by GitHub). The load_credentials_file() function opens 
-the yaml file that is stored locally and returns the data dictionary, contained within 'cred' variable. Finally, the 
-'credentials' variable is created which purpose is to call the function.
-
-'''
-
-#%%
 class RDSDatabaseConnector:
     '''
     This class uses the information in the credentials.yaml file to connect to the remote database.
@@ -65,48 +55,3 @@ df = db_connect.extract_RDS_data(engine)
 '''
 Three instances of the class are created to access the extracted data.
 '''
-
-print(df.head())
-
-'''
-Tests whether the data is successfully extracted and can be accessed by printing top rows of the database.
-'''
-#%%
-def save_to_csv():
-    df.to_csv("C:/Users/eveli/ai_core/EDA/loan_payments.csv")
-    
-save_to_csv()
-
-'''
-This function is used to save the extracted data locally in csv format.
-
-When save_to_csv() function is called, the data extracted from the remote RDS database is saved locally in csv format
-and names "loan_payments".
-'''
-# %%
-
-def load_data():
-    loan_payments = pd.read_csv("C:/Users/eveli/ai_core/EDA/loan_payments.csv")
-    return loan_payments
-lp_df = load_data()
-'''
-The function loads the "loan_payments.csv" database from the local computer.
-
-lp_df calls the function which returns the locally stored database in a table format. 
-'''
-
-lp_df
-
-lp_df.shape  #Shows that the table has 54231 rows and 44 rows. 
-
-lp_df.describe()
-
-'''
-Various commands to explore the dataset.
-
-lp_df: calls the database.
-lp_df.shape: calls for the information of the database shape.
-lp_df.describe(): calls for the summary of the database that includes information such as count, mean, max, min etc.
-'''
-
-# %%
