@@ -40,9 +40,6 @@ class DataFrameTransform:
         
     def categ_data_outliers_transform(self):
         self.df_raw["home_ownership"].replace({"NONE": "OTHER"}, inplace=True)
-        self.df_raw["loan_status"].replace({"Does not meet the credit policy. Status:Charged Off": "Charged Off"}, inplace=True)
-        self.df_raw["loan_status"].replace({"Does not meet the credit policy. Status:Fully Paid": "Fully Paid"}, inplace=True)
-        self.df_raw["verification_status"].replace({"Source Verified": "Verified"}, inplace=True)
         self.df_raw.drop(self.df_raw[self.df_raw['payment_plan'] == 'y'].index, inplace=True)
         
     def iqr_outliers_removal(self, column_name):
