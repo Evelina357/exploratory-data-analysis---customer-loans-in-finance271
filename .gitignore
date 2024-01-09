@@ -1,7 +1,7 @@
 credentials.yaml
-**.csv
-**.doc
+*.csv
+*.doc
 copies
-drafts
+drafts/
 __pycache__
 **sql
