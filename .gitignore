@@ -1,1 +1,7 @@
 credentials.yaml
+**.csv
+**.doc
+copies
+drafts
+__pycache__
+**sql
